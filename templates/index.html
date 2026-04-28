@@ -25,6 +25,7 @@
         header p { font-size: 1rem; opacity: 0.95; }
         header .nav-links {
             margin-top: 18px; display: flex; gap: 12px; justify-content: center;
+            flex-wrap: wrap;
         }
         header .nav-links a {
             color: white; background: rgba(255,255,255,0.18);
@@ -43,6 +44,7 @@
         .card {
             background: white; border-radius: 14px; padding: 26px 28px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+            margin-bottom: 24px;
         }
 
         .card h2 {
@@ -70,6 +72,12 @@
             outline: none; border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102,126,234,0.15); background: white;
         }
+        input.invalid, select.invalid { border-color: #e57373; background: #fff5f5; }
+        .field-error {
+            font-size: 0.75rem; color: #c62828; margin-top: 3px;
+            display: none;
+        }
+        .field-error.show { display: block; }
 
         button.predict {
             width: 100%; margin-top: 18px; padding: 13px;
@@ -94,9 +102,17 @@
             text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
         }
         .result .value { font-size: 1.7rem; color: #155724; font-weight: 700; }
+        .result .confidence {
+            font-size: 0.82rem; color: #2d6a31; margin-top: 6px;
+        }
 
         .preview-banner {
             background: #fff3cd; border: 1px solid #ffe69c; color: #664d03;
+            padding: 10px 14px; border-radius: 8px; font-size: 0.85rem;
+            margin-bottom: 18px;
+        }
+        .form-error {
+            background: #ffebee; border: 1px solid #ffcdd2; color: #b71c1c;
             padding: 10px 14px; border-radius: 8px; font-size: 0.85rem;
             margin-bottom: 18px;
         }
@@ -132,17 +148,32 @@
             color: #667eea; font-weight: 600; background: #f0f2fb;
             padding: 3px 10px; border-radius: 12px; font-size: 0.85rem;
         }
+
+        .model-info-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+        }
+        @media (max-width: 500px) { .model-info-grid { grid-template-columns: 1fr 1fr; } }
+        .model-info-box {
+            background: #f5f7ff; border: 1px solid #e0e6f5;
+            padding: 12px; border-radius: 8px; text-align: center;
+        }
+        .model-info-value { font-size: 1.1rem; font-weight: 700; color: #4a5dc7; }
+        .model-info-label {
+            font-size: 0.72rem; color: #666; margin-top: 3px;
+            text-transform: uppercase; letter-spacing: 0.3px;
+        }
     </style>
 </head>
 <body>
 <div class="page">
 
     <header>
-        <h1>🏠 House Rent Prediction</h1>
+        <h1>House Rent Prediction</h1>
         <p>Trained on <span id="header-rows">—</span> listings across <span id="header-cities">—</span> Indian cities</p>
         <div class="nav-links">
-            <a href="/recommendations" target="_blank">Top Recommendations</a>
-            <a href="/graphs" target="_blank">Trend Graphs</a>
+            <a href="/recommendations">Top Recommendations</a>
+            <a href="/graphs">Trend Graphs</a>
+            <a href="/metrics">Model Metrics</a>
         </div>
     </header>
 
@@ -153,39 +184,43 @@
             <div id="preview-banner" class="preview-banner" style="display:none;">
                 Static preview mode — showing example values. Run <code>python app.py</code> for live predictions.
             </div>
-            <form method="POST" id="rent-form">
+            <div id="form-error" class="form-error" style="display:none;"></div>
+            <form method="POST" id="rent-form" novalidate>
                 <div class="form-grid">
                     <div>
-                        <label>BHK</label>
+                        <label for="f-bhk">BHK</label>
                         <input type="number" name="bhk" id="f-bhk" required>
+                        <div class="field-error" data-for="f-bhk">Enter a valid BHK count.</div>
                     </div>
                     <div>
-                        <label>Size (sq ft)</label>
+                        <label for="f-size">Size (sq ft)</label>
                         <input type="number" name="size" id="f-size" required>
+                        <div class="field-error" data-for="f-size">Enter a valid size.</div>
                     </div>
                     <div>
-                        <label>Bathrooms</label>
+                        <label for="f-bathroom">Bathrooms</label>
                         <input type="number" name="bathroom" id="f-bathroom" required>
+                        <div class="field-error" data-for="f-bathroom">Enter a valid bathroom count.</div>
                     </div>
                     <div class="span-2">
-                        <label>City</label>
-                        <select name="city" id="f-city"></select>
+                        <label for="f-city">City</label>
+                        <select name="city" id="f-city" required></select>
                     </div>
                     <div>
-                        <label>Area Type</label>
-                        <select name="area_type" id="f-area_type"></select>
+                        <label for="f-area_type">Area Type</label>
+                        <select name="area_type" id="f-area_type" required></select>
                     </div>
                     <div>
-                        <label>Furnishing</label>
-                        <select name="furnishing" id="f-furnishing"></select>
+                        <label for="f-furnishing">Furnishing</label>
+                        <select name="furnishing" id="f-furnishing" required></select>
                     </div>
                     <div>
-                        <label>Tenant Preferred</label>
-                        <select name="tenant" id="f-tenant"></select>
+                        <label for="f-tenant">Tenant Preferred</label>
+                        <select name="tenant" id="f-tenant" required></select>
                     </div>
                     <div>
-                        <label>Point of Contact</label>
-                        <select name="contact" id="f-contact"></select>
+                        <label for="f-contact">Point of Contact</label>
+                        <select name="contact" id="f-contact" required></select>
                     </div>
                 </div>
                 <button type="submit" class="predict">Predict Rent</button>
@@ -194,6 +229,7 @@
             <div id="result-box" class="result" style="display:none;">
                 <div class="label">Estimated Monthly Rent</div>
                 <div class="value" id="result-value">—</div>
+                <div class="confidence" id="result-confidence"></div>
             </div>
         </section>
 
@@ -213,6 +249,25 @@
         </section>
 
     </div>
+
+    <section class="card" id="model-info-card" style="display:none;">
+        <h2>Model Info <small>see <a href="/metrics" style="color:#667eea;text-decoration:none;">full metrics →</a></small></h2>
+        <div class="model-info-grid">
+            <div class="model-info-box">
+                <div class="model-info-value" id="mi-r2">—</div>
+                <div class="model-info-label">Test R²</div>
+            </div>
+            <div class="model-info-box">
+                <div class="model-info-value" id="mi-mae">—</div>
+                <div class="model-info-label">Mean Abs Error</div>
+            </div>
+            <div class="model-info-box">
+                <div class="model-info-value" id="mi-samples">—</div>
+                <div class="model-info-label">Training Samples</div>
+            </div>
+        </div>
+    </section>
+
 </div>
 
 <script id="server-data" type="application/json">{{ server_data_json | safe }}</script>
@@ -239,7 +294,9 @@
             }
         },
         submitted: {},
-        prediction: null
+        prediction: null,
+        error: null,
+        model_info: {}
     };
 
     let DATA = FALLBACK;
@@ -258,31 +315,28 @@
     if (isStaticPreview) {
         document.getElementById('preview-banner').style.display = 'block';
         document.getElementById('snapshot-source').textContent = 'example data';
-        document.getElementById('rent-form').addEventListener('submit', function (e) {
-            e.preventDefault();
-            alert('Static preview only. Run `python app.py` and open http://127.0.0.1:5000 to get live predictions.');
-        });
     }
 
     const fmt = n => '₹' + Number(n).toLocaleString('en-IN');
     const opts = DATA.options;
     const stats = DATA.stats;
     const submitted = DATA.submitted || {};
+    const modelInfo = DATA.model_info || {};
 
     document.getElementById('header-rows').textContent = Number(stats.rows).toLocaleString('en-IN');
     document.getElementById('header-cities').textContent = stats.cities;
 
     const bhk = document.getElementById('f-bhk');
     bhk.min = opts.bhk_min; bhk.max = opts.bhk_max;
-    bhk.value = submitted.bhk || 2;
+    bhk.value = submitted.bhk || Math.max(opts.bhk_min, 2);
 
     const size = document.getElementById('f-size');
     size.min = opts.size_min; size.max = opts.size_max;
-    size.value = submitted.size || 1000;
+    size.value = submitted.size || Math.min(Math.max(opts.size_min, 1000), opts.size_max);
 
     const bath = document.getElementById('f-bathroom');
     bath.min = opts.bath_min; bath.max = opts.bath_max;
-    bath.value = submitted.bathroom || 2;
+    bath.value = submitted.bathroom || Math.max(opts.bath_min, 2);
 
     function fillSelect(id, items, selected) {
         const el = document.getElementById(id);
@@ -310,15 +364,65 @@
     const cityList = document.getElementById('city-list');
     Object.entries(stats.city_avg).forEach(([city, rent]) => {
         const li = document.createElement('li');
-        li.innerHTML = '<span class="city-name">' + city + '</span>' +
-                       '<span class="city-rent">' + fmt(rent) + '</span>';
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'city-name';
+        nameSpan.textContent = city;
+        const rentSpan = document.createElement('span');
+        rentSpan.className = 'city-rent';
+        rentSpan.textContent = fmt(rent);
+        li.appendChild(nameSpan);
+        li.appendChild(rentSpan);
         cityList.appendChild(li);
     });
+
+    if (modelInfo && modelInfo.test_r2 != null) {
+        document.getElementById('model-info-card').style.display = 'block';
+        document.getElementById('mi-r2').textContent = Number(modelInfo.test_r2).toFixed(3);
+        document.getElementById('mi-mae').textContent = fmt(Math.round(modelInfo.test_mae));
+        document.getElementById('mi-samples').textContent = Number(modelInfo.n_samples).toLocaleString('en-IN');
+    }
 
     if (DATA.prediction) {
         document.getElementById('result-box').style.display = 'block';
         document.getElementById('result-value').textContent = DATA.prediction;
+        if (modelInfo && modelInfo.test_mae != null) {
+            document.getElementById('result-confidence').textContent =
+                '±' + fmt(Math.round(modelInfo.test_mae)) + ' (model MAE)';
+        }
     }
+    if (DATA.error) {
+        const errBox = document.getElementById('form-error');
+        errBox.style.display = 'block';
+        errBox.textContent = DATA.error;
+    }
+
+    const form = document.getElementById('rent-form');
+    form.addEventListener('submit', function (e) {
+        if (isStaticPreview) {
+            e.preventDefault();
+            alert('Static preview only. Run `python app.py` and open http://127.0.0.1:5000 to get live predictions.');
+            return;
+        }
+        let ok = true;
+        const checks = [
+            ['f-bhk', opts.bhk_min, opts.bhk_max],
+            ['f-size', opts.size_min, opts.size_max],
+            ['f-bathroom', opts.bath_min, opts.bath_max],
+        ];
+        checks.forEach(([id, mn, mx]) => {
+            const el = document.getElementById(id);
+            const v = Number(el.value);
+            const err = document.querySelector('.field-error[data-for="' + id + '"]');
+            const bad = !el.value || isNaN(v) || v < mn || v > mx;
+            el.classList.toggle('invalid', bad);
+            if (err) {
+                err.classList.toggle('show', bad);
+                err.textContent = bad ? 'Enter a value between ' + mn + ' and ' + mx + '.' : '';
+            }
+            if (bad) ok = false;
+        });
+        if (!ok) e.preventDefault();
+    });
 })();
 </script>
 </body>

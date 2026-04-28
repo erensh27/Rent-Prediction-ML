@@ -1,21 +1,94 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rental Recommendations</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; padding: 30px 20px; color: #2c3e50;
+        }
+        .page { max-width: 1000px; margin: 0 auto; }
+        header { text-align: center; color: white; margin-bottom: 24px; }
+        header h1 { font-size: 2rem; margin-bottom: 6px; }
+        .nav { margin-top: 14px; }
+        .nav a {
+            color: white; background: rgba(255,255,255,0.18);
+            padding: 8px 16px; border-radius: 24px; text-decoration: none;
+            font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.3);
+        }
+        .nav a:hover { background: rgba(255,255,255,0.3); }
+        .grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 22px;
+        }
+        @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+        .card {
+            background: white; border-radius: 12px; padding: 22px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+        .card h2 {
+            font-size: 1.2rem; color: #333; margin-bottom: 14px;
+            padding-bottom: 8px; border-bottom: 2px solid #eef0fb;
+        }
+        .listing {
+            padding: 12px 4px; border-bottom: 1px solid #f0f0f5;
+        }
+        .listing:last-child { border-bottom: none; }
+        .listing .top {
+            display: flex; justify-content: space-between; align-items: baseline;
+            margin-bottom: 4px;
+        }
+        .listing .title { font-weight: 600; color: #333; }
+        .listing .rent { color: #667eea; font-weight: 700; font-size: 1.05rem; }
+        .listing .meta { font-size: 0.82rem; color: #666; }
+        .listing .meta span { margin-right: 10px; }
+    </style>
 </head>
 <body>
-    <h2>Top 5 Cheapest Houses</h2>
-    <ul>
-        {% for rent, city, bhk in cheapest %}
-        <li>{{ bhk }} BHK in {{ city }} – ₹{{ rent }}</li>
-        {% endfor %}
-    </ul>
+<div class="page">
+    <header>
+        <h1>Rental Recommendations</h1>
+        <div class="nav"><a href="/">← Back to Predictor</a></div>
+    </header>
 
-    <h2>Top 5 Premium Houses</h2>
-    <ul>
-        {% for rent, city, bhk in premium %}
-        <li>{{ bhk }} BHK in {{ city }} – ₹{{ rent }}</li>
-        {% endfor %}
-    </ul>
+    <div class="grid">
+        <section class="card">
+            <h2>Top 5 Cheapest</h2>
+            {% for item in cheapest %}
+            <div class="listing">
+                <div class="top">
+                    <span class="title">{{ item.bhk }} BHK in {{ item.city }}</span>
+                    <span class="rent">₹{{ "{:,}".format(item.rent) }}</span>
+                </div>
+                <div class="meta">
+                    <span>{{ item.size }} sq ft</span>
+                    <span>{{ item.furnishing }}</span>
+                    <span>{{ item.tenant }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </section>
+
+        <section class="card">
+            <h2>Top 5 Premium</h2>
+            {% for item in premium %}
+            <div class="listing">
+                <div class="top">
+                    <span class="title">{{ item.bhk }} BHK in {{ item.city }}</span>
+                    <span class="rent">₹{{ "{:,}".format(item.rent) }}</span>
+                </div>
+                <div class="meta">
+                    <span>{{ item.size }} sq ft</span>
+                    <span>{{ item.furnishing }}</span>
+                    <span>{{ item.tenant }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </section>
+    </div>
+</div>
 </body>
 </html>

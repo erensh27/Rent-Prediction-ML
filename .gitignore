@@ -1,0 +1,13 @@
+*.pkl
+*.pyc
+__pycache__/
+.venv/
+venv/
+env/
+.env
+*.egg-info/
+dist/
+build/
+.DS_Store
+Thumbs.db
+static/*.png
