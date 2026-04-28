@@ -3,93 +3,198 @@
 <head>
     <title>House Rent Prediction</title>
     <style>
-        body { font-family: Arial; background: #f4f6f8; }
-        .box {
-            width: 400px;
-            margin: 50px auto;
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
             padding: 20px;
-            background: white;
-            border-radius: 8px;
+            min-height: 100vh;
         }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 800px) {
+            .container { grid-template-columns: 1fr; }
+        }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+        h1 { text-align: center; color: white; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #f0f0f0; margin-bottom: 25px; }
+        h2 { margin-top: 0; color: #333; border-bottom: 2px solid #667eea; padding-bottom: 8px; }
+        label { font-size: 13px; color: #555; font-weight: 600; }
         input, select, button {
             width: 100%;
-            padding: 8px;
-            margin: 8px 0;
+            padding: 10px;
+            margin: 5px 0 12px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
         }
         button {
-            background: #007bff;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 15px;
         }
-        h2 { text-align: center; }
+        button:hover { opacity: 0.9; }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e8f5e9;
+            border-left: 4px solid #28a745;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 20px;
+            color: #155724;
+            font-weight: 600;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .stat-box {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .stat-value { font-size: 22px; font-weight: 700; color: #667eea; }
+        .stat-label { font-size: 12px; color: #666; }
+        .city-list { font-size: 14px; }
+        .city-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .city-list li:last-child { border: none; }
+        .nav-links { display: flex; gap: 10px; margin-top: 15px; }
+        .nav-links a { flex: 1; text-decoration: none; }
+        .btn-secondary {
+            background: linear-gradient(135deg, #28a745 0%, #20a05a 100%) !important;
+        }
     </style>
 </head>
 <body>
 
-<div class="box">
-    <h2>🏠 Rent Prediction</h2>
+<h1>🏠 House Rent Prediction</h1>
+<p class="subtitle">Trained on {{ stats.rows }} listings across {{ stats.cities }} Indian cities</p>
 
-    <form method="POST">
-        <input type="number" name="bhk" placeholder="BHK" required>
-        <input type="number" name="size" placeholder="Size (sq ft)" required>
-        <input type="number" name="bathroom" placeholder="Bathrooms" required>
+<div class="container">
 
-        <select name="city">
-            <option>Bangalore</option>
-            <option>Chennai</option>
-            <option>Delhi</option>
-            <option>Hyderabad</option>
-            <option>Kolkata</option>
-            <option>Mumbai</option>
-        </select>
+    <div class="card">
+        <h2>Predict Rent</h2>
+        <form method="POST">
+            <label>BHK ({{ options.bhk_min }} – {{ options.bhk_max }})</label>
+            <input type="number" name="bhk" min="{{ options.bhk_min }}" max="{{ options.bhk_max }}"
+                   value="{{ submitted.bhk or 2 }}" required>
 
-        <select name="area_type">
-            <option>Built Area</option>
-            <option>Super Area</option>
-            <option>Carpet Area</option>
-        </select>
+            <label>Size in sq ft ({{ options.size_min }} – {{ options.size_max }})</label>
+            <input type="number" name="size" min="{{ options.size_min }}" max="{{ options.size_max }}"
+                   value="{{ submitted.size or 1000 }}" required>
 
-        <select name="furnishing">
-            <option>Unfurnished</option>
-            <option>Semi-Furnished</option>
-            <option>Furnished</option>
-        </select>
+            <label>Bathrooms ({{ options.bath_min }} – {{ options.bath_max }})</label>
+            <input type="number" name="bathroom" min="{{ options.bath_min }}" max="{{ options.bath_max }}"
+                   value="{{ submitted.bathroom or 2 }}" required>
 
-        <select name="tenant">
-            <option>Bachelors</option>
-            <option>Family</option>
-            <option>Bachelors/Family</option>
-        </select>
+            <label>City</label>
+            <select name="city">
+                {% for c in options.cities %}
+                <option value="{{ c }}" {% if submitted.city == c %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </select>
 
-        <select name="contact">
-            <option>Contact Owner</option>
-            <option>Contact Agent</option>
-        </select>
+            <label>Area Type</label>
+            <select name="area_type">
+                {% for a in options.area_types %}
+                <option value="{{ a }}" {% if submitted.area_type == a %}selected{% endif %}>{{ a }}</option>
+                {% endfor %}
+            </select>
 
-        <button type="submit">Predict Rent</button>
-    </form>
+            <label>Furnishing</label>
+            <select name="furnishing">
+                {% for f in options.furnishings %}
+                <option value="{{ f }}" {% if submitted.furnishing == f %}selected{% endif %}>{{ f }}</option>
+                {% endfor %}
+            </select>
 
-    {% if prediction %}
-        <h3>Estimated Rent:  {{ prediction }}</h3>
-    {% endif %}
-    <br><br>
-<a href="/recommendations" target="_blank">
-    <button>View Rental Recommendations</button>
-</a>
-    <br><br>
+            <label>Tenant Preferred</label>
+            <select name="tenant">
+                {% for t in options.tenants %}
+                <option value="{{ t }}" {% if submitted.tenant == t %}selected{% endif %}>{{ t }}</option>
+                {% endfor %}
+            </select>
 
-<a href="/graphs" target="_blank">
-    <button style="
-        padding: 10px 20px;
-        background-color: #28a745;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    ">
-        View Rent Trend Graphs
-    </button>
-</a>
+            <label>Point of Contact</label>
+            <select name="contact">
+                {% for p in options.contacts %}
+                <option value="{{ p }}" {% if submitted.contact == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">Predict Rent</button>
+        </form>
+
+        {% if prediction %}
+            <div class="result">Estimated Rent: {{ prediction }}</div>
+        {% endif %}
+
+        <div class="nav-links">
+            <a href="/recommendations" target="_blank"><button class="btn-secondary">Recommendations</button></a>
+            <a href="/graphs" target="_blank"><button class="btn-secondary">Trend Graphs</button></a>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Dataset Snapshot</h2>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-value">{{ stats.rows }}</div>
+                <div class="stat-label">Total Listings</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">{{ stats.cities }}</div>
+                <div class="stat-label">Cities</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">₹{{ "{:,}".format(stats.avg_rent) }}</div>
+                <div class="stat-label">Average Rent</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">₹{{ "{:,}".format(stats.median_rent) }}</div>
+                <div class="stat-label">Median Rent</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">₹{{ "{:,}".format(stats.min_rent) }}</div>
+                <div class="stat-label">Min Rent</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">₹{{ "{:,}".format(stats.max_rent) }}</div>
+                <div class="stat-label">Max Rent</div>
+            </div>
+        </div>
+
+        <h2>Average Rent by City</h2>
+        <ul class="city-list">
+            {% for city, rent in stats.city_avg.items() %}
+            <li><span>{{ city }}</span><span>₹{{ "{:,}".format(rent) }}</span></li>
+            {% endfor %}
+        </ul>
+    </div>
+
 </div>
 
 </body>
