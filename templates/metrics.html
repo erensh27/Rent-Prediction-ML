@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Metrics</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; padding: 30px 20px; color: #2c3e50;
+        }
+        .page { max-width: 900px; margin: 0 auto; }
+        header { text-align: center; color: white; margin-bottom: 24px; }
+        header h1 { font-size: 2rem; margin-bottom: 6px; }
+        header p { font-size: 0.95rem; opacity: 0.9; }
+        .nav { margin-top: 14px; }
+        .nav a {
+            color: white; background: rgba(255,255,255,0.18);
+            padding: 8px 16px; border-radius: 24px; text-decoration: none;
+            font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.3);
+        }
+        .nav a:hover { background: rgba(255,255,255,0.3); }
+        .card {
+            background: white; border-radius: 12px; padding: 26px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15); margin-bottom: 22px;
+        }
+        .card h2 {
+            font-size: 1.2rem; color: #333; margin-bottom: 14px;
+            padding-bottom: 8px; border-bottom: 2px solid #eef0fb;
+        }
+        .grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+        }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr 1fr; } }
+        .metric {
+            background: linear-gradient(135deg, #f8f9ff 0%, #eef0fb 100%);
+            padding: 16px 12px; border-radius: 8px; text-align: center;
+            border: 1px solid #e8ebf7;
+        }
+        .metric .value { font-size: 1.3rem; font-weight: 700; color: #667eea; }
+        .metric .label {
+            font-size: 0.72rem; color: #666; margin-top: 4px;
+            text-transform: uppercase; letter-spacing: 0.4px;
+        }
+        .meta-row {
+            display: flex; justify-content: space-between; padding: 8px 0;
+            border-bottom: 1px solid #f0f0f5; font-size: 0.92rem;
+        }
+        .meta-row:last-child { border-bottom: none; }
+        .meta-row .key { color: #555; font-weight: 500; }
+        .meta-row .val { color: #333; }
+        .features {
+            display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;
+        }
+        .features span {
+            background: #f0f2fb; color: #4a5dc7; padding: 4px 10px;
+            border-radius: 12px; font-size: 0.82rem;
+        }
+        .empty {
+            background: #fff3cd; border: 1px solid #ffe69c; color: #664d03;
+            padding: 14px 18px; border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <header>
+        <h1>Model Metrics</h1>
+        <p>Performance summary for the trained rent-prediction model</p>
+        <div class="nav"><a href="/">← Back to Predictor</a></div>
+    </header>
+
+    {% if not metrics %}
+    <div class="card">
+        <div class="empty">
+            No metrics available yet. Train the model with
+            <code>python rent_prediction.py --retrain</code> to generate
+            <code>model_metrics.json</code>.
+        </div>
+    </div>
+    {% else %}
+
+    <section class="card">
+        <h2>Test-Set Performance</h2>
+        <div class="grid">
+            <div class="metric">
+                <div class="value">{{ "%.3f"|format(metrics.test_r2) }}</div>
+                <div class="label">R²</div>
+            </div>
+            <div class="metric">
+                <div class="value">₹{{ "{:,.0f}".format(metrics.test_mae) }}</div>
+                <div class="label">MAE</div>
+            </div>
+            <div class="metric">
+                <div class="value">₹{{ "{:,.0f}".format(metrics.test_rmse) }}</div>
+                <div class="label">RMSE</div>
+            </div>
+            <div class="metric">
+                <div class="value">{{ "%.2f"|format(metrics.test_mape) }}%</div>
+                <div class="label">MAPE</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>5-Fold Cross-Validation</h2>
+        <div class="grid">
+            <div class="metric">
+                <div class="value">{{ "%.3f"|format(metrics.cv_r2_mean) }}</div>
+                <div class="label">R² (mean)</div>
+            </div>
+            <div class="metric">
+                <div class="value">±{{ "%.3f"|format(metrics.cv_r2_std) }}</div>
+                <div class="label">R² (std)</div>
+            </div>
+            <div class="metric">
+                <div class="value">₹{{ "{:,.0f}".format(metrics.cv_mae_mean) }}</div>
+                <div class="label">MAE (mean)</div>
+            </div>
+            <div class="metric">
+                <div class="value">±₹{{ "{:,.0f}".format(metrics.cv_mae_std) }}</div>
+                <div class="label">MAE (std)</div>
+            </div>
+            <div class="metric">
+                <div class="value">₹{{ "{:,.0f}".format(metrics.cv_rmse_mean) }}</div>
+                <div class="label">RMSE (mean)</div>
+            </div>
+            <div class="metric">
+                <div class="value">±₹{{ "{:,.0f}".format(metrics.cv_rmse_std) }}</div>
+                <div class="label">RMSE (std)</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>Training Details</h2>
+        <div class="meta-row">
+            <span class="key">Estimator</span>
+            <span class="val">{{ metrics.estimator or "—" }}</span>
+        </div>
+        <div class="meta-row">
+            <span class="key">Trained at</span>
+            <span class="val">{{ metrics.trained_at or "—" }}</span>
+        </div>
+        <div class="meta-row">
+            <span class="key">Total samples (after outlier removal)</span>
+            <span class="val">{{ "{:,}".format(metrics.n_samples) }}</span>
+        </div>
+        <div class="meta-row">
+            <span class="key">Train / Test split</span>
+            <span class="val">{{ "{:,}".format(metrics.n_train) }} / {{ "{:,}".format(metrics.n_test) }}</span>
+        </div>
+        <div class="meta-row">
+            <span class="key">Features</span>
+            <span class="val">
+                <div class="features">
+                    {% for feature in metrics.features %}
+                    <span>{{ feature }}</span>
+                    {% endfor %}
+                </div>
+            </span>
+        </div>
+    </section>
+    {% endif %}
+</div>
+</body>
+</html>
