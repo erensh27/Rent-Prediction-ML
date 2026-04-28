@@ -15,122 +15,67 @@
             color: #2c3e50;
         }
 
-        .page {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+        .page { max-width: 1200px; margin: 0 auto; }
 
-        header {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-        }
+        header { text-align: center; color: white; margin-bottom: 30px; }
         header h1 {
-            font-size: 2.4rem;
-            margin-bottom: 8px;
+            font-size: 2.4rem; margin-bottom: 8px;
             text-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
-        header p {
-            font-size: 1rem;
-            opacity: 0.95;
-        }
+        header p { font-size: 1rem; opacity: 0.95; }
         header .nav-links {
-            margin-top: 18px;
-            display: flex;
-            gap: 12px;
-            justify-content: center;
+            margin-top: 18px; display: flex; gap: 12px; justify-content: center;
         }
         header .nav-links a {
-            color: white;
-            background: rgba(255,255,255,0.18);
-            padding: 9px 18px;
-            border-radius: 24px;
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
+            color: white; background: rgba(255,255,255,0.18);
+            padding: 9px 18px; border-radius: 24px; text-decoration: none;
+            font-size: 0.9rem; font-weight: 500;
             border: 1px solid rgba(255,255,255,0.3);
             transition: background 0.2s;
         }
-        header .nav-links a:hover {
-            background: rgba(255,255,255,0.3);
-        }
+        header .nav-links a:hover { background: rgba(255,255,255,0.3); }
 
         .layout {
-            display: grid;
-            grid-template-columns: 1.1fr 1fr;
-            gap: 24px;
+            display: grid; grid-template-columns: 1.1fr 1fr; gap: 24px;
         }
-        @media (max-width: 900px) {
-            .layout { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
 
         .card {
-            background: white;
-            border-radius: 14px;
-            padding: 26px 28px;
+            background: white; border-radius: 14px; padding: 26px 28px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.18);
         }
 
         .card h2 {
-            font-size: 1.25rem;
-            color: #333;
-            margin-bottom: 18px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #eef0fb;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            font-size: 1.25rem; color: #333; margin-bottom: 18px;
+            padding-bottom: 10px; border-bottom: 2px solid #eef0fb;
+            display: flex; align-items: center; justify-content: space-between;
         }
-        .card h2 small {
-            font-size: 0.75rem;
-            color: #888;
-            font-weight: 400;
-        }
+        .card h2 small { font-size: 0.75rem; color: #888; font-weight: 400; }
 
         .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 12px 14px;
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px 14px;
         }
-        .form-grid .full { grid-column: 1 / -1; }
         .form-grid .span-2 { grid-column: span 2; }
 
         label {
-            display: block;
-            font-size: 0.78rem;
-            color: #555;
-            font-weight: 600;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
+            display: block; font-size: 0.78rem; color: #555; font-weight: 600;
+            margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.3px;
         }
         input, select {
-            width: 100%;
-            padding: 9px 11px;
-            border: 1px solid #d8dbe8;
-            border-radius: 7px;
-            font-size: 0.92rem;
-            background: #fafbff;
+            width: 100%; padding: 9px 11px; border: 1px solid #d8dbe8;
+            border-radius: 7px; font-size: 0.92rem; background: #fafbff;
             transition: border-color 0.15s, box-shadow 0.15s;
         }
         input:focus, select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102,126,234,0.15);
-            background: white;
+            outline: none; border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.15); background: white;
         }
 
         button.predict {
-            width: 100%;
-            margin-top: 18px;
-            padding: 13px;
+            width: 100%; margin-top: 18px; padding: 13px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
+            color: white; border: none; border-radius: 8px;
+            font-size: 1rem; font-weight: 600; cursor: pointer;
             letter-spacing: 0.4px;
             transition: transform 0.1s, box-shadow 0.2s;
         }
@@ -140,82 +85,52 @@
         }
 
         .result {
-            margin-top: 18px;
-            padding: 18px;
+            margin-top: 18px; padding: 18px;
             background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
-            border-left: 5px solid #28a745;
-            border-radius: 8px;
-            text-align: center;
+            border-left: 5px solid #28a745; border-radius: 8px; text-align: center;
         }
         .result .label {
-            font-size: 0.78rem;
-            color: #2d6a31;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
+            font-size: 0.78rem; color: #2d6a31; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
         }
-        .result .value {
-            font-size: 1.7rem;
-            color: #155724;
-            font-weight: 700;
+        .result .value { font-size: 1.7rem; color: #155724; font-weight: 700; }
+
+        .preview-banner {
+            background: #fff3cd; border: 1px solid #ffe69c; color: #664d03;
+            padding: 10px 14px; border-radius: 8px; font-size: 0.85rem;
+            margin-bottom: 18px;
         }
 
         .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 22px;
+            display: grid; grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px; margin-bottom: 22px;
         }
-        @media (max-width: 500px) {
-            .stats-grid { grid-template-columns: 1fr 1fr; }
-        }
+        @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
         .stat-box {
             background: linear-gradient(135deg, #f8f9ff 0%, #eef0fb 100%);
-            padding: 14px 10px;
-            border-radius: 8px;
-            text-align: center;
+            padding: 14px 10px; border-radius: 8px; text-align: center;
             border: 1px solid #e8ebf7;
         }
-        .stat-value {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #667eea;
-            line-height: 1.2;
-        }
+        .stat-value { font-size: 1.25rem; font-weight: 700; color: #667eea; line-height: 1.2; }
         .stat-label {
-            font-size: 0.72rem;
-            color: #666;
-            margin-top: 3px;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
+            font-size: 0.72rem; color: #666; margin-top: 3px;
+            text-transform: uppercase; letter-spacing: 0.4px;
         }
 
         .city-list {
-            list-style: none;
-            max-height: 280px;
-            overflow-y: auto;
-            padding-right: 6px;
+            list-style: none; max-height: 280px; overflow-y: auto; padding-right: 6px;
         }
         .city-list::-webkit-scrollbar { width: 6px; }
         .city-list::-webkit-scrollbar-thumb { background: #c5c9e0; border-radius: 3px; }
         .city-list li {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 9px 4px;
-            border-bottom: 1px solid #f0f0f5;
-            font-size: 0.9rem;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 9px 4px; border-bottom: 1px solid #f0f0f5; font-size: 0.9rem;
         }
         .city-list li:last-child { border-bottom: none; }
         .city-list .city-name { color: #333; font-weight: 500; }
         .city-list .city-rent {
-            color: #667eea;
-            font-weight: 600;
-            background: #f0f2fb;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 0.85rem;
+            color: #667eea; font-weight: 600; background: #f0f2fb;
+            padding: 3px 10px; border-radius: 12px; font-size: 0.85rem;
         }
     </style>
 </head>
@@ -224,7 +139,7 @@
 
     <header>
         <h1>🏠 House Rent Prediction</h1>
-        <p>Trained on {{ "{:,}".format(stats.rows) }} listings across {{ stats.cities }} Indian cities</p>
+        <p>Trained on <span id="header-rows">—</span> listings across <span id="header-cities">—</span> Indian cities</p>
         <div class="nav-links">
             <a href="/recommendations" target="_blank">Top Recommendations</a>
             <a href="/graphs" target="_blank">Trend Graphs</a>
@@ -235,122 +150,176 @@
 
         <section class="card">
             <h2>Predict Rent <small>fill in property details</small></h2>
-            <form method="POST">
+            <div id="preview-banner" class="preview-banner" style="display:none;">
+                Static preview mode — showing example values. Run <code>python app.py</code> for live predictions.
+            </div>
+            <form method="POST" id="rent-form">
                 <div class="form-grid">
                     <div>
                         <label>BHK</label>
-                        <input type="number" name="bhk"
-                               min="{{ options.bhk_min }}" max="{{ options.bhk_max }}"
-                               value="{{ submitted.bhk or 2 }}" required>
+                        <input type="number" name="bhk" id="f-bhk" required>
                     </div>
                     <div>
                         <label>Size (sq ft)</label>
-                        <input type="number" name="size"
-                               min="{{ options.size_min }}" max="{{ options.size_max }}"
-                               value="{{ submitted.size or 1000 }}" required>
+                        <input type="number" name="size" id="f-size" required>
                     </div>
                     <div>
                         <label>Bathrooms</label>
-                        <input type="number" name="bathroom"
-                               min="{{ options.bath_min }}" max="{{ options.bath_max }}"
-                               value="{{ submitted.bathroom or 2 }}" required>
+                        <input type="number" name="bathroom" id="f-bathroom" required>
                     </div>
-
                     <div class="span-2">
                         <label>City</label>
-                        <select name="city">
-                            {% for c in options.cities %}
-                            <option value="{{ c }}" {% if submitted.city == c %}selected{% endif %}>{{ c }}</option>
-                            {% endfor %}
-                        </select>
+                        <select name="city" id="f-city"></select>
                     </div>
                     <div>
                         <label>Area Type</label>
-                        <select name="area_type">
-                            {% for a in options.area_types %}
-                            <option value="{{ a }}" {% if submitted.area_type == a %}selected{% endif %}>{{ a }}</option>
-                            {% endfor %}
-                        </select>
+                        <select name="area_type" id="f-area_type"></select>
                     </div>
-
                     <div>
                         <label>Furnishing</label>
-                        <select name="furnishing">
-                            {% for f in options.furnishings %}
-                            <option value="{{ f }}" {% if submitted.furnishing == f %}selected{% endif %}>{{ f }}</option>
-                            {% endfor %}
-                        </select>
+                        <select name="furnishing" id="f-furnishing"></select>
                     </div>
                     <div>
                         <label>Tenant Preferred</label>
-                        <select name="tenant">
-                            {% for t in options.tenants %}
-                            <option value="{{ t }}" {% if submitted.tenant == t %}selected{% endif %}>{{ t }}</option>
-                            {% endfor %}
-                        </select>
+                        <select name="tenant" id="f-tenant"></select>
                     </div>
                     <div>
                         <label>Point of Contact</label>
-                        <select name="contact">
-                            {% for p in options.contacts %}
-                            <option value="{{ p }}" {% if submitted.contact == p %}selected{% endif %}>{{ p }}</option>
-                            {% endfor %}
-                        </select>
+                        <select name="contact" id="f-contact"></select>
                     </div>
                 </div>
-
                 <button type="submit" class="predict">Predict Rent</button>
             </form>
 
-            {% if prediction %}
-            <div class="result">
+            <div id="result-box" class="result" style="display:none;">
                 <div class="label">Estimated Monthly Rent</div>
-                <div class="value">{{ prediction }}</div>
+                <div class="value" id="result-value">—</div>
             </div>
-            {% endif %}
         </section>
 
         <section class="card">
-            <h2>Dataset Snapshot <small>live from CSV</small></h2>
+            <h2>Dataset Snapshot <small id="snapshot-source">live from CSV</small></h2>
             <div class="stats-grid">
-                <div class="stat-box">
-                    <div class="stat-value">{{ "{:,}".format(stats.rows) }}</div>
-                    <div class="stat-label">Listings</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-value">{{ stats.cities }}</div>
-                    <div class="stat-label">Cities</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-value">₹{{ "{:,}".format(stats.avg_rent) }}</div>
-                    <div class="stat-label">Avg Rent</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-value">₹{{ "{:,}".format(stats.median_rent) }}</div>
-                    <div class="stat-label">Median</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-value">₹{{ "{:,}".format(stats.min_rent) }}</div>
-                    <div class="stat-label">Minimum</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-value">₹{{ "{:,}".format(stats.max_rent) }}</div>
-                    <div class="stat-label">Maximum</div>
-                </div>
+                <div class="stat-box"><div class="stat-value" id="s-rows">—</div><div class="stat-label">Listings</div></div>
+                <div class="stat-box"><div class="stat-value" id="s-cities">—</div><div class="stat-label">Cities</div></div>
+                <div class="stat-box"><div class="stat-value" id="s-avg">—</div><div class="stat-label">Avg Rent</div></div>
+                <div class="stat-box"><div class="stat-value" id="s-median">—</div><div class="stat-label">Median</div></div>
+                <div class="stat-box"><div class="stat-value" id="s-min">—</div><div class="stat-label">Minimum</div></div>
+                <div class="stat-box"><div class="stat-value" id="s-max">—</div><div class="stat-label">Maximum</div></div>
             </div>
 
             <h2>Average Rent by City</h2>
-            <ul class="city-list">
-                {% for city, rent in stats.city_avg.items() %}
-                <li>
-                    <span class="city-name">{{ city }}</span>
-                    <span class="city-rent">₹{{ "{:,}".format(rent) }}</span>
-                </li>
-                {% endfor %}
-            </ul>
+            <ul class="city-list" id="city-list"></ul>
         </section>
 
     </div>
 </div>
+
+<script id="server-data" type="application/json">{{ server_data_json | safe }}</script>
+<script>
+(function () {
+    const FALLBACK = {
+        options: {
+            cities: ["Bangalore", "Chennai", "Delhi", "Hyderabad", "Kolkata", "Mumbai"],
+            area_types: ["Built Area", "Carpet Area", "Super Area"],
+            furnishings: ["Furnished", "Semi-Furnished", "Unfurnished"],
+            tenants: ["Bachelors", "Bachelors/Family", "Family"],
+            contacts: ["Contact Agent", "Contact Builder", "Contact Owner"],
+            bhk_min: 1, bhk_max: 6,
+            size_min: 10, size_max: 8000,
+            bath_min: 1, bath_max: 10
+        },
+        stats: {
+            rows: 4746, cities: 6,
+            avg_rent: 34917, median_rent: 16000,
+            min_rent: 1200, max_rent: 3500000,
+            city_avg: {
+                "Kolkata": 11645, "Hyderabad": 20555, "Bangalore": 24966,
+                "Chennai": 27508, "Delhi": 29867, "Mumbai": 85715
+            }
+        },
+        submitted: {},
+        prediction: null
+    };
+
+    let DATA = FALLBACK;
+    let isStaticPreview = true;
+    try {
+        const raw = document.getElementById('server-data').textContent.trim();
+        if (raw && !raw.includes('{{') && raw.startsWith('{')) {
+            const parsed = JSON.parse(raw);
+            if (parsed && parsed.stats && parsed.options) {
+                DATA = parsed;
+                isStaticPreview = false;
+            }
+        }
+    } catch (e) { /* fall through to fallback */ }
+
+    if (isStaticPreview) {
+        document.getElementById('preview-banner').style.display = 'block';
+        document.getElementById('snapshot-source').textContent = 'example data';
+        document.getElementById('rent-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            alert('Static preview only. Run `python app.py` and open http://127.0.0.1:5000 to get live predictions.');
+        });
+    }
+
+    const fmt = n => '₹' + Number(n).toLocaleString('en-IN');
+    const opts = DATA.options;
+    const stats = DATA.stats;
+    const submitted = DATA.submitted || {};
+
+    document.getElementById('header-rows').textContent = Number(stats.rows).toLocaleString('en-IN');
+    document.getElementById('header-cities').textContent = stats.cities;
+
+    const bhk = document.getElementById('f-bhk');
+    bhk.min = opts.bhk_min; bhk.max = opts.bhk_max;
+    bhk.value = submitted.bhk || 2;
+
+    const size = document.getElementById('f-size');
+    size.min = opts.size_min; size.max = opts.size_max;
+    size.value = submitted.size || 1000;
+
+    const bath = document.getElementById('f-bathroom');
+    bath.min = opts.bath_min; bath.max = opts.bath_max;
+    bath.value = submitted.bathroom || 2;
+
+    function fillSelect(id, items, selected) {
+        const el = document.getElementById(id);
+        el.innerHTML = '';
+        items.forEach(v => {
+            const o = document.createElement('option');
+            o.value = v; o.textContent = v;
+            if (selected === v) o.selected = true;
+            el.appendChild(o);
+        });
+    }
+    fillSelect('f-city', opts.cities, submitted.city);
+    fillSelect('f-area_type', opts.area_types, submitted.area_type);
+    fillSelect('f-furnishing', opts.furnishings, submitted.furnishing);
+    fillSelect('f-tenant', opts.tenants, submitted.tenant);
+    fillSelect('f-contact', opts.contacts, submitted.contact);
+
+    document.getElementById('s-rows').textContent = Number(stats.rows).toLocaleString('en-IN');
+    document.getElementById('s-cities').textContent = stats.cities;
+    document.getElementById('s-avg').textContent = fmt(stats.avg_rent);
+    document.getElementById('s-median').textContent = fmt(stats.median_rent);
+    document.getElementById('s-min').textContent = fmt(stats.min_rent);
+    document.getElementById('s-max').textContent = fmt(stats.max_rent);
+
+    const cityList = document.getElementById('city-list');
+    Object.entries(stats.city_avg).forEach(([city, rent]) => {
+        const li = document.createElement('li');
+        li.innerHTML = '<span class="city-name">' + city + '</span>' +
+                       '<span class="city-rent">' + fmt(rent) + '</span>';
+        cityList.appendChild(li);
+    });
+
+    if (DATA.prediction) {
+        document.getElementById('result-box').style.display = 'block';
+        document.getElementById('result-value').textContent = DATA.prediction;
+    }
+})();
+</script>
 </body>
 </html>

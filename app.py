@@ -5,6 +5,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
+import json
 import joblib
 import heapq
 
@@ -95,12 +96,15 @@ def home():
         else:
             prediction = f"₹ {int(raw_prediction):,}"
 
+    server_data = {
+        "options": get_form_options(),
+        "stats": get_dataset_stats(),
+        "submitted": submitted,
+        "prediction": prediction,
+    }
     return render_template(
         "index.html",
-        prediction=prediction,
-        submitted=submitted,
-        options=get_form_options(),
-        stats=get_dataset_stats(),
+        server_data_json=json.dumps(server_data),
     )
 
 
