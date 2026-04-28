@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rental Recommendations</title>
+</head>
+<body>
+    <h2>Top 5 Cheapest Houses</h2>
+    <ul>
+        {% for rent, city, bhk in cheapest %}
+        <li>{{ bhk }} BHK in {{ city }} – ₹{{ rent }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Top 5 Premium Houses</h2>
+    <ul>
+        {% for rent, city, bhk in premium %}
+        <li>{{ bhk }} BHK in {{ city }} – ₹{{ rent }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

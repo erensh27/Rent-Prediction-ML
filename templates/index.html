@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>House Rent Prediction</title>
+    <style>
+        body { font-family: Arial; background: #f4f6f8; }
+        .box {
+            width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+        }
+        h2 { text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>🏠 Rent Prediction</h2>
+
+    <form method="POST">
+        <input type="number" name="bhk" placeholder="BHK" required>
+        <input type="number" name="size" placeholder="Size (sq ft)" required>
+        <input type="number" name="bathroom" placeholder="Bathrooms" required>
+
+        <select name="city">
+            <option>Bangalore</option>
+            <option>Chennai</option>
+            <option>Delhi</option>
+            <option>Hyderabad</option>
+            <option>Kolkata</option>
+            <option>Mumbai</option>
+        </select>
+
+        <select name="area_type">
+            <option>Built Area</option>
+            <option>Super Area</option>
+            <option>Carpet Area</option>
+        </select>
+
+        <select name="furnishing">
+            <option>Unfurnished</option>
+            <option>Semi-Furnished</option>
+            <option>Furnished</option>
+        </select>
+
+        <select name="tenant">
+            <option>Bachelors</option>
+            <option>Family</option>
+            <option>Bachelors/Family</option>
+        </select>
+
+        <select name="contact">
+            <option>Contact Owner</option>
+            <option>Contact Agent</option>
+        </select>
+
+        <button type="submit">Predict Rent</button>
+    </form>
+
+    {% if prediction %}
+        <h3>Estimated Rent:  {{ prediction }}</h3>
+    {% endif %}
+    <br><br>
+<a href="/recommendations" target="_blank">
+    <button>View Rental Recommendations</button>
+</a>
+    <br><br>
+
+<a href="/graphs" target="_blank">
+    <button style="
+        padding: 10px 20px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    ">
+        View Rent Trend Graphs
+    </button>
+</a>
+</div>
+
+</body>
+</html>

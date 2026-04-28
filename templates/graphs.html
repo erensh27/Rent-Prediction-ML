@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rent Trend Graphs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        img {
+            width: 80%;
+            max-width: 800px;
+            margin-bottom: 40px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h2>Rent Trend Graphs</h2>
+
+    <h3>Rent vs Size</h3>
+    <img src="{{ url_for('static', filename='rent_vs_size.png') }}">
+
+    <h3>Average Rent by City</h3>
+    <img src="{{ url_for('static', filename='rent_by_city.png') }}">
+
+    <h3>Feature Correlation</h3>
+    <img src="{{ url_for('static', filename='correlation.png') }}">
+</body>
+</html>
