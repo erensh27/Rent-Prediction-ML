@@ -1,0 +1,36 @@
+{
+  "cities": [
+    "Bangalore",
+    "Chennai",
+    "Delhi",
+    "Hyderabad",
+    "Kolkata",
+    "Mumbai"
+  ],
+  "area_types": [
+    "Built Area",
+    "Carpet Area",
+    "Super Area"
+  ],
+  "furnishings": [
+    "Furnished",
+    "Semi-Furnished",
+    "Unfurnished"
+  ],
+  "tenants": [
+    "Bachelors",
+    "Bachelors/Family",
+    "Family"
+  ],
+  "contacts": [
+    "Contact Agent",
+    "Contact Builder",
+    "Contact Owner"
+  ],
+  "bhk_min": 1,
+  "bhk_max": 6,
+  "size_min": 10,
+  "size_max": 6000,
+  "bath_min": 1,
+  "bath_max": 7
+}

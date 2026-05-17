@@ -15,119 +15,71 @@ import pandas as pd
 import seaborn as sns
 from flask import Flask, jsonify, render_template, request
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-DATASET_PATH = os.path.join(HERE, "House_Rent_Dataset.csv")
-MODEL_PATH = os.path.join(HERE, "rent_prediction_model.pkl")
-METRICS_PATH = os.path.join(HERE, "model_metrics.json")
-IMPORTANCES_PATH = os.path.join(HERE, "feature_importances.csv")
-STATIC_DIR = os.path.join(HERE, "static")
-
-HOST = os.environ.get("HOST", "0.0.0.0")
-PORT = int(os.environ.get("PORT", "5000"))
-DEBUG = os.environ.get("DEBUG", "False").lower() in {"1", "true", "yes"}
-
+import config
 
 def _load_model() -> Any:
-    if not os.path.exists(MODEL_PATH):
+    if not os.path.exists(config.MODEL_PATH):
         print(
-            f"ERROR: model file not found at {MODEL_PATH}\n"
+            f"ERROR: model file not found at {config.MODEL_PATH}\n"
             f"Run: python rent_prediction.py --retrain",
             file=sys.stderr,
         )
         sys.exit(1)
     try:
-        return joblib.load(MODEL_PATH)
+        return joblib.load(config.MODEL_PATH)
     except Exception as exc:
         print(f"ERROR: failed to load model: {exc}", file=sys.stderr)
         sys.exit(1)
 
 
 def _load_dataset() -> pd.DataFrame:
-    if not os.path.exists(DATASET_PATH):
-        print(f"ERROR: dataset not found at {DATASET_PATH}", file=sys.stderr)
+    if not os.path.exists(config.DATASET_PATH):
+        print(f"ERROR: dataset not found at {config.DATASET_PATH}", file=sys.stderr)
         sys.exit(1)
     try:
-        return pd.read_csv(DATASET_PATH)
+        return pd.read_csv(config.DATASET_PATH)
     except Exception as exc:
         print(f"ERROR: failed to read dataset: {exc}", file=sys.stderr)
         sys.exit(1)
 
 
-def _load_metrics() -> dict[str, Any]:
-    if not os.path.exists(METRICS_PATH):
-        return {}
+def _load_json(path: str, default: Any = None) -> Any:
+    if not os.path.exists(path):
+        return default or {}
     try:
-        with open(METRICS_PATH, "r", encoding="utf-8") as f:
+        with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
     except Exception as exc:
-        print(f"WARNING: failed to read metrics file: {exc}", file=sys.stderr)
-        return {}
+        print(f"WARNING: failed to read JSON file {path}: {exc}", file=sys.stderr)
+        return default or {}
 
 
 model = _load_model()
-df_raw = _load_dataset()
-METRICS = _load_metrics()
+# df_raw no longer needed as all stats/recs are pre-calculated
+# df_raw = _load_dataset()
+METRICS = _load_json(config.METRICS_PATH)
+OPTIONS = _load_json(config.FORM_OPTIONS_PATH)
+STATS = _load_json(config.STATS_PATH)
+RECS = _load_json(config.RECS_PATH)
 MODEL_VERSION = METRICS.get("trained_at", "unknown")
 
 app = Flask(__name__)
 
 
-@lru_cache(maxsize=1)
 def get_form_options() -> dict[str, Any]:
-    return {
-        "cities": sorted(df_raw["City"].dropna().unique().tolist()),
-        "area_types": sorted(df_raw["Area Type"].dropna().unique().tolist()),
-        "furnishings": sorted(df_raw["Furnishing Status"].dropna().unique().tolist()),
-        "tenants": sorted(df_raw["Tenant Preferred"].dropna().unique().tolist()),
-        "contacts": sorted(df_raw["Point of Contact"].dropna().unique().tolist()),
-        "bhk_min": int(df_raw["BHK"].min()),
-        "bhk_max": int(df_raw["BHK"].max()),
-        "size_min": int(df_raw["Size"].min()),
-        "size_max": int(df_raw["Size"].max()),
-        "bath_min": int(df_raw["Bathroom"].min()),
-        "bath_max": int(df_raw["Bathroom"].max()),
-    }
+    return OPTIONS
 
 
-@lru_cache(maxsize=1)
 def get_dataset_stats() -> dict[str, Any]:
-    return {
-        "rows": int(len(df_raw)),
-        "cities": int(df_raw["City"].nunique()),
-        "avg_rent": int(df_raw["Rent"].mean()),
-        "median_rent": int(df_raw["Rent"].median()),
-        "min_rent": int(df_raw["Rent"].min()),
-        "max_rent": int(df_raw["Rent"].max()),
-        "city_avg": {
-            city: int(rent)
-            for city, rent in df_raw.groupby("City")["Rent"].mean().sort_values().items()
-        },
-    }
+    return STATS
 
 
-@lru_cache(maxsize=1)
 def get_prediction_cap() -> int:
-    return int(df_raw["Rent"].quantile(0.99))
+    return STATS.get("prediction_cap", 200000)
 
 
-@lru_cache(maxsize=1)
 def heap_rent_ranking() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    cols = ["Rent", "BHK", "Size", "City", "Furnishing Status", "Tenant Preferred"]
-    sorted_df = df_raw[cols].sort_values("Rent")
-    cheapest = [_listing_dict(row) for _, row in sorted_df.head(5).iterrows()]
-    premium = [_listing_dict(row) for _, row in sorted_df.tail(5).iloc[::-1].iterrows()]
-    return cheapest, premium
-
-
-def _listing_dict(row: pd.Series) -> dict[str, Any]:
-    return {
-        "rent": int(row["Rent"]),
-        "bhk": int(row["BHK"]),
-        "size": int(row["Size"]),
-        "city": row["City"],
-        "furnishing": row["Furnishing Status"],
-        "tenant": row["Tenant Preferred"],
-    }
+    return RECS.get("cheapest", []), RECS.get("premium", [])
 
 
 def _format_prediction(value: float) -> str:
@@ -137,7 +89,28 @@ def _format_prediction(value: float) -> str:
     return f"₹ {int(value):,}"
 
 
+def parse_floor(floor_str: Any) -> tuple[int, int]:
+    try:
+        if not isinstance(floor_str, str):
+            return 0, 1
+        parts = floor_str.split(" out of ")
+        level_str = parts[0].strip().lower()
+        if level_str == "ground":
+            level = 0
+        elif level_str == "lower basement":
+            level = -1
+        elif level_str == "upper basement":
+            level = -2
+        else:
+            level = int(level_str)
+
+        total = int(parts[1].strip()) if len(parts) > 1 else level + 1
+        return level, total
+    except (ValueError, IndexError):
+        return 0, 1
+
 def _build_input_df(form_data: dict[str, Any]) -> pd.DataFrame:
+    floor_level, total_floors = parse_floor(form_data.get("Floor", "Ground out of 1"))
     return pd.DataFrame([{
         "BHK": int(form_data["BHK"]),
         "Size": int(form_data["Size"]),
@@ -147,6 +120,8 @@ def _build_input_df(form_data: dict[str, Any]) -> pd.DataFrame:
         "Furnishing Status": form_data["Furnishing Status"],
         "Tenant Preferred": form_data["Tenant Preferred"],
         "Point of Contact": form_data["Point of Contact"],
+        "floor_level": floor_level,
+        "total_floors": total_floors,
     }])
 
 
@@ -236,7 +211,7 @@ def health() -> Any:
     return jsonify({
         "status": "ok",
         "model": "loaded" if model is not None else "missing",
-        "dataset_rows": int(len(df_raw)),
+        "dataset_rows": STATS.get("rows", 0),
         "model_version": MODEL_VERSION,
     })
 
@@ -265,53 +240,5 @@ def api_predict() -> Any:
     })
 
 
-def generate_trend_graphs() -> None:
-    os.makedirs(STATIC_DIR, exist_ok=True)
-
-    plt.figure()
-    plt.scatter(df_raw["Size"], df_raw["Rent"], alpha=0.4)
-    plt.xlabel("Size (sq ft)")
-    plt.ylabel("Rent")
-    plt.title("Rent vs Size")
-    plt.tight_layout()
-    plt.savefig(os.path.join(STATIC_DIR, "rent_vs_size.png"))
-    plt.close()
-
-    plt.figure()
-    df_raw.groupby("City")["Rent"].mean().sort_values().plot(kind="bar")
-    plt.ylabel("Average Rent")
-    plt.title("Average Rent by City")
-    plt.tight_layout()
-    plt.savefig(os.path.join(STATIC_DIR, "rent_by_city.png"))
-    plt.close()
-
-    plt.figure()
-    sns.heatmap(df_raw[["BHK", "Size", "Bathroom", "Rent"]].corr(), annot=True)
-    plt.title("Feature Correlation")
-    plt.tight_layout()
-    plt.savefig(os.path.join(STATIC_DIR, "correlation.png"))
-    plt.close()
-
-
-def generate_feature_importance_chart() -> None:
-    if not os.path.exists(IMPORTANCES_PATH):
-        return
-    try:
-        imp = pd.read_csv(IMPORTANCES_PATH).head(15).iloc[::-1]
-    except Exception as exc:
-        print(f"WARNING: could not read importances: {exc}", file=sys.stderr)
-        return
-    os.makedirs(STATIC_DIR, exist_ok=True)
-    plt.figure(figsize=(8, 6))
-    plt.barh(imp["feature"], imp["importance_mean"], xerr=imp["importance_std"])
-    plt.xlabel("Permutation Importance")
-    plt.title("Top Feature Importances")
-    plt.tight_layout()
-    plt.savefig(os.path.join(STATIC_DIR, "feature_importances.png"))
-    plt.close()
-
-
 if __name__ == "__main__":
-    generate_trend_graphs()
-    generate_feature_importance_chart()
-    app.run(host=HOST, port=PORT, debug=DEBUG)
+    app.run(host=config.HOST, port=config.PORT, debug=config.DEBUG)

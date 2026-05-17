@@ -1,0 +1,86 @@
+{
+  "cheapest": [
+    {
+      "rent": 1200,
+      "bhk": 3,
+      "size": 2100,
+      "city": "Hyderabad",
+      "furnishing": "Furnished",
+      "tenant": "Bachelors/Family"
+    },
+    {
+      "rent": 1500,
+      "bhk": 1,
+      "size": 200,
+      "city": "Kolkata",
+      "furnishing": "Semi-Furnished",
+      "tenant": "Bachelors/Family"
+    },
+    {
+      "rent": 1800,
+      "bhk": 1,
+      "size": 500,
+      "city": "Kolkata",
+      "furnishing": "Semi-Furnished",
+      "tenant": "Bachelors/Family"
+    },
+    {
+      "rent": 2000,
+      "bhk": 2,
+      "size": 60,
+      "city": "Delhi",
+      "furnishing": "Unfurnished",
+      "tenant": "Bachelors/Family"
+    },
+    {
+      "rent": 2200,
+      "bhk": 1,
+      "size": 700,
+      "city": "Kolkata",
+      "furnishing": "Unfurnished",
+      "tenant": "Bachelors/Family"
+    }
+  ],
+  "premium": [
+    {
+      "rent": 120000,
+      "bhk": 3,
+      "size": 1379,
+      "city": "Mumbai",
+      "furnishing": "Unfurnished",
+      "tenant": "Bachelors/Family"
+    },
+    {
+      "rent": 120000,
+      "bhk": 3,
+      "size": 1130,
+      "city": "Mumbai",
+      "furnishing": "Semi-Furnished",
+      "tenant": "Bachelors/Family"
+    },
+    {
+      "rent": 120000,
+      "bhk": 3,
+      "size": 2770,
+      "city": "Bangalore",
+      "furnishing": "Semi-Furnished",
+      "tenant": "Bachelors/Family"
+    },
+    {
+      "rent": 120000,
+      "bhk": 2,
+      "size": 900,
+      "city": "Mumbai",
+      "furnishing": "Semi-Furnished",
+      "tenant": "Family"
+    },
+    {
+      "rent": 120000,
+      "bhk": 3,
+      "size": 2110,
+      "city": "Bangalore",
+      "furnishing": "Unfurnished",
+      "tenant": "Bachelors"
+    }
+  ]
+}

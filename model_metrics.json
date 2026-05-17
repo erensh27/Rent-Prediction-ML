@@ -1,0 +1,35 @@
+{
+  "cv_mae_mean": 6230.152362778365,
+  "cv_mae_std": 217.30874206143147,
+  "cv_rmse_mean": 10261.65259605178,
+  "cv_rmse_std": 516.3990770867659,
+  "cv_r2_mean": 0.7687195941603091,
+  "cv_r2_std": 0.023920088766423663,
+  "test_mae": 6597.55427854213,
+  "test_rmse": 11231.733084705666,
+  "test_r2": 0.7243314895526463,
+  "test_mape": 35.31080844982944,
+  "best_params": {
+    "model__subsample": "0.9",
+    "model__n_estimators": "400",
+    "model__max_depth": "4",
+    "model__learning_rate": "0.05"
+  },
+  "trained_at": "2026-05-17T14:20:03.505284+00:00",
+  "n_samples": 4499,
+  "n_train": 3599,
+  "n_test": 900,
+  "features": [
+    "BHK",
+    "Size",
+    "Bathroom",
+    "floor_level",
+    "total_floors",
+    "City",
+    "Area Type",
+    "Furnishing Status",
+    "Tenant Preferred",
+    "Point of Contact"
+  ],
+  "estimator": "GradientBoostingRegressor"
+}
