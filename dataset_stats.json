@@ -1,0 +1,17 @@
+{
+  "rows": 4499,
+  "cities": 6,
+  "avg_rent": 23420,
+  "median_rent": 15000,
+  "min_rent": 1200,
+  "max_rent": 120000,
+  "city_avg": {
+    "Kolkata": 11323,
+    "Hyderabad": 18286,
+    "Chennai": 18585,
+    "Bangalore": 18671,
+    "Delhi": 22901,
+    "Mumbai": 48191
+  },
+  "prediction_cap": 100000
+}
