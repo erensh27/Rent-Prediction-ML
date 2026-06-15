@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import sys
 from functools import lru_cache
@@ -11,9 +12,17 @@ import joblib
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import seaborn as sns
 from flask import Flask, jsonify, render_template, request
+
+from rent_prediction import (
+    FrequencyEncoder,
+    add_interactions,
+    get_feature_cols,
+    parse_floor,
+)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATASET_PATH = os.path.join(HERE, "House_Rent_Dataset.csv")
@@ -26,20 +35,35 @@ HOST = os.environ.get("HOST", "0.0.0.0")
 PORT = int(os.environ.get("PORT", "5000"))
 DEBUG = os.environ.get("DEBUG", "False").lower() in {"1", "true", "yes"}
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+log = logging.getLogger("app")
 
-def _load_model() -> Any:
+
+def _load_artifacts() -> tuple[Any, Any, Any]:
+    """Load model, locality_encoder, and metrics. Exits on failure."""
     if not os.path.exists(MODEL_PATH):
-        print(
-            f"ERROR: model file not found at {MODEL_PATH}\n"
-            f"Run: python rent_prediction.py --retrain",
-            file=sys.stderr,
-        )
+        print(f"ERROR: model file not found at {MODEL_PATH}\n"
+              f"Run: python rent_prediction.py --retrain", file=sys.stderr)
         sys.exit(1)
     try:
-        return joblib.load(MODEL_PATH)
+        data = joblib.load(MODEL_PATH)
+        if isinstance(data, tuple):
+            pipeline, locality_encoder = data
+        else:
+            pipeline, locality_encoder = data, None
     except Exception as exc:
         print(f"ERROR: failed to load model: {exc}", file=sys.stderr)
         sys.exit(1)
+
+    metrics = {}
+    if os.path.exists(METRICS_PATH):
+        try:
+            with open(METRICS_PATH, "r", encoding="utf-8") as f:
+                metrics = json.load(f)
+        except Exception as exc:
+            print(f"WARNING: failed to read metrics: {exc}", file=sys.stderr)
+
+    return pipeline, locality_encoder, metrics
 
 
 def _load_dataset() -> pd.DataFrame:
@@ -53,21 +77,11 @@ def _load_dataset() -> pd.DataFrame:
         sys.exit(1)
 
 
-def _load_metrics() -> dict[str, Any]:
-    if not os.path.exists(METRICS_PATH):
-        return {}
-    try:
-        with open(METRICS_PATH, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception as exc:
-        print(f"WARNING: failed to read metrics file: {exc}", file=sys.stderr)
-        return {}
-
-
-model = _load_model()
+model, locality_encoder, METRICS = _load_artifacts()
 df_raw = _load_dataset()
-METRICS = _load_metrics()
 MODEL_VERSION = METRICS.get("trained_at", "unknown")
+TARGET_TRANSFORM = METRICS.get("target_transform", "none")
+IS_GBR = "GradientBoosting" in METRICS.get("estimator", "")
 
 app = Flask(__name__)
 
@@ -137,17 +151,36 @@ def _format_prediction(value: float) -> str:
     return f"₹ {int(value):,}"
 
 
+# Feature columns used by the model (excluding categoricals that are stored
+# directly in the form data).
+_NUMERIC_FEATURE_KEYS = ["BHK", "Size", "Bathroom"]
+_CATEGORICAL_FEATURE_KEYS = [
+    "City", "Area Type", "Furnishing Status", "Tenant Preferred", "Point of Contact",
+]
+
+
 def _build_input_df(form_data: dict[str, Any]) -> pd.DataFrame:
-    return pd.DataFrame([{
-        "BHK": int(form_data["BHK"]),
-        "Size": int(form_data["Size"]),
-        "Bathroom": int(form_data["Bathroom"]),
-        "City": form_data["City"],
-        "Area Type": form_data["Area Type"],
-        "Furnishing Status": form_data["Furnishing Status"],
-        "Tenant Preferred": form_data["Tenant Preferred"],
-        "Point of Contact": form_data["Point of Contact"],
-    }])
+    """Build a DataFrame with all engineered features expected by the model."""
+    row = {k: form_data.get(k) for k in _NUMERIC_FEATURE_KEYS + _CATEGORICAL_FEATURE_KEYS}
+    row["Floor"] = f"{form_data.get('floor_number', 'Ground')} out of {form_data.get('total_floors', 1)}"
+    df = pd.DataFrame([row])
+
+    # 1. Parse floor
+    floor_df = parse_floor(df["Floor"])
+    df = pd.concat([df, floor_df], axis=1)
+
+    # 2. Frequency-encode locality (if encoder available)
+    if locality_encoder is not None:
+        if "Area Locality" not in df.columns:
+            df["Area Locality"] = "Unknown"
+        encoded = locality_encoder.transform(df[["Area Locality"]])
+        df["locality_freq"] = encoded["Area Locality_freq"]
+
+    # 3. Interaction features
+    df = add_interactions(df)
+
+    # 4. Select columns in correct order
+    return df[get_feature_cols()]
 
 
 def _model_info() -> dict[str, Any]:
@@ -159,6 +192,8 @@ def _model_info() -> dict[str, Any]:
         "test_rmse": METRICS.get("test_rmse"),
         "n_samples": METRICS.get("n_samples"),
         "trained_at": METRICS.get("trained_at"),
+        "estimator": METRICS.get("estimator"),
+        "features": METRICS.get("features"),
     }
 
 
@@ -171,17 +206,24 @@ def home() -> Any:
     if request.method == "POST":
         try:
             form_data = {
-                "BHK": request.form["bhk"],
-                "Size": request.form["size"],
-                "Bathroom": request.form["bathroom"],
+                "BHK": int(request.form["bhk"]),
+                "Size": int(request.form["size"]),
+                "Bathroom": int(request.form["bathroom"]),
                 "City": request.form["city"],
                 "Area Type": request.form["area_type"],
                 "Furnishing Status": request.form["furnishing"],
                 "Tenant Preferred": request.form["tenant"],
                 "Point of Contact": request.form["contact"],
+                "floor_number": request.form.get("floor_number", "Ground"),
+                "total_floors": int(request.form.get("total_floors", 1)),
             }
             input_df = _build_input_df(form_data)
             raw_prediction = float(model.predict(input_df)[0])
+
+            # Reverse log-transform if needed
+            if TARGET_TRANSFORM == "log1p":
+                raw_prediction = float(np.expm1(raw_prediction))
+
             prediction = _format_prediction(raw_prediction)
             submitted = {
                 "bhk": int(form_data["BHK"]),
@@ -238,6 +280,7 @@ def health() -> Any:
         "model": "loaded" if model is not None else "missing",
         "dataset_rows": int(len(df_raw)),
         "model_version": MODEL_VERSION,
+        "estimator": METRICS.get("estimator", "unknown"),
     })
 
 
@@ -246,14 +289,17 @@ def api_predict() -> Any:
     payload = request.get_json(silent=True)
     if not payload:
         return jsonify({"error": "JSON body required"}), 400
-    required = ["BHK", "Size", "Bathroom", "City", "Area Type",
-                "Furnishing Status", "Tenant Preferred", "Point of Contact"]
+    required = _NUMERIC_FEATURE_KEYS + _CATEGORICAL_FEATURE_KEYS
     missing = [k for k in required if k not in payload]
     if missing:
         return jsonify({"error": f"missing fields: {missing}"}), 400
     try:
+        payload.setdefault("floor_number", "Ground")
+        payload.setdefault("total_floors", 1)
         input_df = _build_input_df(payload)
         raw_prediction = float(model.predict(input_df)[0])
+        if TARGET_TRANSFORM == "log1p":
+            raw_prediction = float(np.expm1(raw_prediction))
     except ValueError as exc:
         return jsonify({"error": f"invalid input: {exc}"}), 400
     cap = get_prediction_cap()
@@ -265,31 +311,37 @@ def api_predict() -> Any:
     })
 
 
+# ---------------------------------------------------------------------------
+# Chart generation
+# ---------------------------------------------------------------------------
+
+
 def generate_trend_graphs() -> None:
     os.makedirs(STATIC_DIR, exist_ok=True)
 
     plt.figure()
-    plt.scatter(df_raw["Size"], df_raw["Rent"], alpha=0.4)
+    plt.scatter(df_raw["Size"], df_raw["Rent"], alpha=0.4, s=15)
     plt.xlabel("Size (sq ft)")
-    plt.ylabel("Rent")
+    plt.ylabel("Rent (₹)")
     plt.title("Rent vs Size")
     plt.tight_layout()
-    plt.savefig(os.path.join(STATIC_DIR, "rent_vs_size.png"))
+    plt.savefig(os.path.join(STATIC_DIR, "rent_vs_size.png"), dpi=120)
     plt.close()
 
     plt.figure()
-    df_raw.groupby("City")["Rent"].mean().sort_values().plot(kind="bar")
-    plt.ylabel("Average Rent")
+    df_raw.groupby("City")["Rent"].mean().sort_values().plot(kind="bar", color="steelblue")
+    plt.ylabel("Average Rent (₹)")
     plt.title("Average Rent by City")
     plt.tight_layout()
-    plt.savefig(os.path.join(STATIC_DIR, "rent_by_city.png"))
+    plt.savefig(os.path.join(STATIC_DIR, "rent_by_city.png"), dpi=120)
     plt.close()
 
-    plt.figure()
-    sns.heatmap(df_raw[["BHK", "Size", "Bathroom", "Rent"]].corr(), annot=True)
+    plt.figure(figsize=(7, 5))
+    sns.heatmap(df_raw[["BHK", "Size", "Bathroom", "Rent"]].corr(),
+                annot=True, cmap="coolwarm", fmt=".2f")
     plt.title("Feature Correlation")
     plt.tight_layout()
-    plt.savefig(os.path.join(STATIC_DIR, "correlation.png"))
+    plt.savefig(os.path.join(STATIC_DIR, "correlation.png"), dpi=120)
     plt.close()
 
 
@@ -298,20 +350,25 @@ def generate_feature_importance_chart() -> None:
         return
     try:
         imp = pd.read_csv(IMPORTANCES_PATH).head(15).iloc[::-1]
-    except Exception as exc:
-        print(f"WARNING: could not read importances: {exc}", file=sys.stderr)
+    except Exception:
         return
     os.makedirs(STATIC_DIR, exist_ok=True)
-    plt.figure(figsize=(8, 6))
-    plt.barh(imp["feature"], imp["importance_mean"], xerr=imp["importance_std"])
+    plt.figure(figsize=(8, 5))
+    plt.barh(imp["feature"], imp["importance_mean"],
+             xerr=imp["importance_std"], color="teal", alpha=0.85)
     plt.xlabel("Permutation Importance")
     plt.title("Top Feature Importances")
     plt.tight_layout()
-    plt.savefig(os.path.join(STATIC_DIR, "feature_importances.png"))
+    plt.savefig(os.path.join(STATIC_DIR, "feature_importances.png"), dpi=120)
     plt.close()
 
+
+# ---------------------------------------------------------------------------
+# Entry point
+# ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
     generate_trend_graphs()
     generate_feature_importance_chart()
+    log.info("Starting server on %s:%s (DEBUG=%s)", HOST, PORT, DEBUG)
     app.run(host=HOST, port=PORT, debug=DEBUG)

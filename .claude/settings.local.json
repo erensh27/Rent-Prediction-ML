@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh pr create --base main --head data-driven-index --title 'Make index.html data-driven from CSV' --body ' *)",
+      "Bash(where gh *)",
+      "Read(//c/Program Files/**)",
+      "Read(//c/Users/abhin/AppData/Local/**)",
+      "Bash(git checkout *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(python -c ' *)",
+      "Bash(python -c \"import pandas as pd; df=pd.read_csv\\('House_Rent_Dataset.csv'\\); print\\('Columns:', df.columns.tolist\\(\\)\\); print\\('\\\\nShape:', df.shape\\); print\\('\\\\nData types:\\\\n', df.dtypes\\); print\\('\\\\nMissing values:\\\\n', df.isnull\\(\\).sum\\(\\)\\)\")",
+      "Bash(python -c \"import flask, pandas, sklearn, numpy, matplotlib, seaborn, joblib; print\\('flask',flask.__version__\\); print\\('pandas',pandas.__version__\\); print\\('sklearn',sklearn.__version__\\); print\\('numpy',numpy.__version__\\); print\\('matplotlib',matplotlib.__version__\\); print\\('seaborn',seaborn.__version__\\); print\\('joblib',joblib.__version__\\)\")"
+    ]
+  }
+}
